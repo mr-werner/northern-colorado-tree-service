@@ -177,89 +177,167 @@ function ServiceAreaMap() {
   const mapRef = useRef(null);
 
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
-    if (!apiKey || !mapRef.current) {
-      if (!apiKey) console.error('VITE_GOOGLE_MAPS_BROWSER_KEY is missing.');
+    const apiKey =
+      import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
+
+    if (!apiKey) {
+      console.error(
+        'VITE_GOOGLE_MAPS_BROWSER_KEY is missing.'
+      );
       return;
     }
 
+    if (!mapRef.current) return;
+
     let servicePolygon = null;
-    let existingScript = null;
-    let addedScript = null;
     let cancelled = false;
 
-    async function initializeMap() {
-      if (cancelled || !mapRef.current || !window.google?.maps) return;
+    const serviceAreaCoordinates = [
+      { lat: 40.98, lng: -105.72 },
+      { lat: 40.98, lng: -105.30 },
+      { lat: 40.94, lng: -104.78 },
+      { lat: 40.62, lng: -104.62 },
+      { lat: 40.50, lng: -104.72 },
+      { lat: 40.43, lng: -104.88 },
+      { lat: 40.30, lng: -105.08 },
+      { lat: 40.39, lng: -105.47 },
+      { lat: 40.63, lng: -105.55 },
+      { lat: 40.90, lng: -105.72 },
+    ];
+
+    function initializeMap() {
+      if (
+        cancelled ||
+        !mapRef.current ||
+        !window.google ||
+        !window.google.maps
+      ) {
+        return;
+      }
 
       try {
-        if (cancelled || !mapRef.current) return;
+        const map = new window.google.maps.Map(
+          mapRef.current,
+          {
+            center: {
+              lat: 40.65,
+              lng: -105.15,
+            },
 
-        const map = new window.google.maps.Map(mapRef.current, {
-          center: { lat: 40.65, lng: -105.15 },
-          zoom: 8,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: true,
-          zoomControl: true,
-          gestureHandling: 'cooperative',
-        });
+            zoom: 8,
 
-        const serviceAreaCoordinates = [
-          { lat: 40.98, lng: -105.72 },
-          { lat: 40.98, lng: -105.30 },
-          { lat: 40.94, lng: -104.78 },
-          { lat: 40.62, lng: -104.62 },
-          { lat: 40.50, lng: -104.72 },
-          { lat: 40.43, lng: -104.88 },
-          { lat: 40.30, lng: -105.08 },
-          { lat: 40.39, lng: -105.47 },
-          { lat: 40.63, lng: -105.55 },
-          { lat: 40.90, lng: -105.72 },
-        ];
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: true,
+            zoomControl: true,
 
-        servicePolygon = new window.google.maps.Polygon({
-          paths: serviceAreaCoordinates,
-          strokeColor: '#17352b',
-          strokeOpacity: 1,
-          strokeWeight: 3,
-          fillColor: '#17352b',
-          fillOpacity: 0.28,
-          clickable: false,
-        });
+            gestureHandling: 'cooperative',
+          }
+        );
+
+        servicePolygon =
+          new window.google.maps.Polygon({
+            paths: serviceAreaCoordinates,
+
+            strokeColor: '#17352b',
+            strokeOpacity: 1,
+            strokeWeight: 3,
+
+            fillColor: '#17352b',
+            fillOpacity: 0.28,
+
+            clickable: false,
+          });
+
         servicePolygon.setMap(map);
 
-        const bounds = new window.google.maps.LatLngBounds();
-        serviceAreaCoordinates.forEach((point) => bounds.extend(point));
+        const bounds =
+          new window.google.maps.LatLngBounds();
+
+        serviceAreaCoordinates.forEach((point) => {
+          bounds.extend(point);
+        });
+
         map.fitBounds(bounds, 45);
       } catch (error) {
-        console.error('Unable to initialize Google Maps:', error);
+        console.error(
+          'Unable to initialize Google Maps:',
+          error
+        );
       }
     }
 
-    const handleScriptLoad = () => initializeMap();
-
-    if (window.google?.maps) {
+    /*
+     * If Maps has already been loaded, don't load
+     * the Google script a second time.
+     */
+    if (
+      window.google?.maps &&
+      typeof window.google.maps.Map === 'function'
+    ) {
       initializeMap();
-    } else {
-      existingScript = document.querySelector('script[data-ncts-google-maps]');
-      if (existingScript) {
-        existingScript.addEventListener('load', handleScriptLoad);
-      } else {
-        addedScript = document.createElement('script');
-        addedScript.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&loading=async`;
-        addedScript.async = true;
-        addedScript.defer = true;
-        addedScript.dataset.nctsGoogleMaps = 'true';
-        addedScript.addEventListener('load', handleScriptLoad);
-        document.head.appendChild(addedScript);
-      }
+
+      return () => {
+        cancelled = true;
+
+        if (servicePolygon) {
+          servicePolygon.setMap(null);
+        }
+      };
     }
+
+    /*
+     * Remove an incomplete script left over from
+     * a previous version of the component.
+     */
+    const oldScript = document.querySelector(
+      'script[data-ncts-google-maps]'
+    );
+
+    if (oldScript) {
+      oldScript.remove();
+    }
+
+    const script = document.createElement('script');
+
+    /*
+     * IMPORTANT:
+     * We're intentionally NOT using loading=async here.
+     *
+     * The script load event will fire after the classic
+     * Maps JavaScript API has initialized its constructors.
+     */
+    script.src =
+      `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
+        apiKey
+      )}&v=weekly`;
+
+    script.async = true;
+    script.defer = true;
+
+    script.dataset.nctsGoogleMaps = 'true';
+
+    script.onload = () => {
+      initializeMap();
+    };
+
+    script.onerror = () => {
+      console.error(
+        'Google Maps JavaScript API failed to load.'
+      );
+    };
+
+    document.head.appendChild(script);
 
     return () => {
       cancelled = true;
-      if (existingScript) existingScript.removeEventListener('load', handleScriptLoad);
-      if (addedScript) addedScript.removeEventListener('load', handleScriptLoad);
-      if (servicePolygon) servicePolygon.setMap(null);
+
+      script.onload = null;
+      script.onerror = null;
+
+      if (servicePolygon) {
+        servicePolygon.setMap(null);
+      }
     };
   }, []);
 
