@@ -192,10 +192,9 @@ function ServiceAreaMap() {
       if (cancelled || !mapRef.current || !window.google?.maps) return;
 
       try {
-        const { Map } = await window.google.maps.importLibrary('maps');
         if (cancelled || !mapRef.current) return;
 
-        const map = new Map(mapRef.current, {
+        const map = new window.google.maps.Map(mapRef.current, {
           center: { lat: 40.65, lng: -105.15 },
           zoom: 8,
           mapTypeControl: false,
@@ -361,7 +360,7 @@ export default function App() {
 
         <div className="header-contact">
           <a className="header-callout" href={PHONE_LINK}>
-            
+
             <span>Free Consultation</span>
             <strong><PhoneIcon /> {PHONE_DISPLAY}</strong>
             <span>24/7 Emergency Service</span>
