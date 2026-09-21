@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const PHONE_DISPLAY = '(970) 775-8877';
 const PHONE_LINK = 'tel:+19707758877';
@@ -25,7 +25,7 @@ const serviceAreas = [
   'Windsor',
 ];
 
-const reviews = [
+const fallbackReviews = [
   {
     quote: 'Northern Colorado Tree Service provided a very professional, educational, and trusting tree trimming service experience.',
     name: 'Barb Hardes',
@@ -132,6 +132,40 @@ function PhoneIcon() {
 export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [formStatus, setFormStatus] = useState('idle');
+  const [googleReviews, setGoogleReviews] = useState({
+    rating: 4.9,
+    userRatingCount: null,
+    reviews: fallbackReviews,
+    googleMapsUri: GOOGLE_REVIEWS_URL,
+    live: false,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadGoogleReviews() {
+      try {
+        const response = await fetch('/api/google-reviews');
+        if (!response.ok) throw new Error(`Google reviews request failed: ${response.status}`);
+
+        const data = await response.json();
+        if (cancelled) return;
+
+        setGoogleReviews({
+          rating: data.rating ?? 4.9,
+          userRatingCount: data.userRatingCount ?? null,
+          reviews: data.reviews?.length ? data.reviews : fallbackReviews,
+          googleMapsUri: data.googleMapsUri || GOOGLE_REVIEWS_URL,
+          live: true,
+        });
+      } catch (error) {
+        console.error('Unable to load live Google reviews:', error);
+      }
+    }
+
+    loadGoogleReviews();
+    return () => { cancelled = true; };
+  }, []);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -183,12 +217,11 @@ export default function App() {
 
         <div className="header-contact">
           <a className="header-callout" href={PHONE_LINK}>
-            <span>Free Consultation</span>
-            <strong><PhoneIcon /> {PHONE_DISPLAY}</strong>
-          </a>
-          <a className="header-callout emergency" href={PHONE_LINK}>
             <span>24/7 Emergency Service</span>
-            <strong>Call Now</strong>
+            
+            
+            <strong><PhoneIcon /> {PHONE_DISPLAY}</strong>
+            <span>Free Consultation</span>
           </a>
           <SocialLinks className="header-socials" />
         </div>
@@ -276,18 +309,31 @@ export default function App() {
               <h2>Known for the work.<br />Remembered for the cleanup.</h2>
             </div>
             <div className="rating-block">
-              <strong>4.9</strong>
+              <strong>{Number(googleReviews.rating).toFixed(1)}</strong>
               <span className="stars">★★★★★</span>
-              <small>Google customer reviews</small>
-              <a className="google-review-link" href={GOOGLE_REVIEWS_URL} target="_blank" rel="noreferrer">Read all Google reviews <ArrowIcon /></a>
+              <small>
+                {googleReviews.userRatingCount
+                  ? `${googleReviews.userRatingCount.toLocaleString()} Google reviews`
+                  : 'Google customer reviews'}
+              </small>
+              <a className="google-review-link" href={googleReviews.googleMapsUri} target="_blank" rel="noreferrer">
+                Read all Google reviews <ArrowIcon />
+              </a>
             </div>
           </div>
           <div className="review-grid">
-            {reviews.map((review, index) => (
-              <blockquote key={index}>
+            {googleReviews.reviews.slice(0, 3).map((review, index) => (
+              <blockquote key={review.publishTime || review.name || index}>
                 <span className="quote-mark">“</span>
                 <p>{review.quote}</p>
-                <footer>{review.name}<span className="google-source">Google Review</span></footer>
+                <footer>
+                  {review.authorUri ? (
+                    <a href={review.authorUri} target="_blank" rel="noreferrer">{review.name}</a>
+                  ) : review.name}
+                  <span className="google-source">
+                    {review.rating ? `${review.rating}★ · ` : ''}Google Review
+                  </span>
+                </footer>
               </blockquote>
             ))}
           </div>
@@ -400,53 +446,6 @@ export default function App() {
         </div>
       </footer>
 
-      <style>{`
-        .brand-copy { display:flex; flex-direction:column; line-height:1; }
-        .brand-copy em { margin-top:.32rem; font-size:.55rem; letter-spacing:.16em; text-transform:uppercase; font-style:normal; opacity:.65; }
-        .header-contact { display:flex; align-items:center; gap:1rem; margin-left:auto; }
-        .header-callout { display:flex; flex-direction:column; text-decoration:none; color:inherit; line-height:1.15; white-space:nowrap; }
-        .header-callout span { font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; opacity:.65; }
-        .header-callout strong { display:flex; align-items:center; gap:.3rem; font-size:.82rem; margin-top:.25rem; }
-        .header-callout svg { width:14px; height:14px; }
-        .header-callout.emergency { border-left:1px solid rgba(0,0,0,.14); padding-left:1rem; }
-        .header-callout.emergency strong { color:#9d2d20; }
-        .social-links { display:flex; gap:.45rem; align-items:center; }
-        .social-links a { width:32px; height:32px; border:1px solid currentColor; border-radius:50%; display:grid; place-items:center; color:inherit; opacity:.82; transition:.2s ease; }
-        .social-links a:hover { opacity:1; transform:translateY(-2px); }
-        .social-links svg { width:16px; height:16px; }
-        .hero-socials { margin-top:1.4rem; color:#fff; }
-        .hero-socials a { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.5); }
-        .google-review-link { display:flex; align-items:center; gap:.35rem; margin-top:.65rem; font-size:.78rem; color:inherit; }
-        .google-review-link svg { width:16px; }
-        .google-source { display:block; margin-top:.25rem; font-size:.68rem; opacity:.55; text-transform:uppercase; letter-spacing:.08em; }
-        .service-area-visual { display:grid; gap:1.25rem; }
-        .map-frame { position:relative; min-height:390px; overflow:hidden; border-radius:2px; background:#ddd; }
-        .map-frame iframe { width:100%; height:390px; border:0; display:block; filter:saturate(.7) contrast(.95); }
-        .map-badge { position:absolute; left:1rem; bottom:1rem; background:#173c2a; color:#fff; padding:.7rem 1rem; font-size:.75rem; letter-spacing:.08em; text-transform:uppercase; box-shadow:0 8px 24px rgba(0,0,0,.16); }
-        .footer-socials { margin-top:1.25rem; }
-        .footer-socials a { border-color:rgba(255,255,255,.35); }
-        .footer-emergency { margin-top:.45rem; font-weight:700; }
-        .credential-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; margin-top:2.25rem; border-top:1px solid rgba(255,255,255,.15); border-bottom:1px solid rgba(255,255,255,.15); }
-        .credential-strip div { padding:1.25rem 1rem; display:flex; flex-direction:column; }
-        .credential-strip strong { font-size:.9rem; }
-        .credential-strip span { margin-top:.3rem; font-size:.7rem; opacity:.6; }
-        @media (max-width:1100px) {
-          .header-contact .header-socials { display:none; }
-          .header-callout.emergency { display:none; }
-        }
-        @media (max-width:820px) {
-          .header-contact { margin-left:auto; margin-right:.5rem; }
-          .header-callout span { display:none; }
-          .header-callout strong { font-size:.72rem; }
-          .credential-strip { grid-template-columns:1fr 1fr; }
-          .map-frame, .map-frame iframe { min-height:320px; height:320px; }
-        }
-        @media (max-width:560px) {
-          .header-contact { display:none; }
-          .credential-strip { grid-template-columns:1fr; }
-          .hero-socials { margin-top:1rem; }
-        }
-      `}</style>
     </div>
   );
 }
