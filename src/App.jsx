@@ -260,11 +260,9 @@ export default function App() {
 
         <div className="header-contact">
           <a className="header-callout" href={PHONE_LINK}>
-            <span>24/7 Emergency Service</span>
-
-
             <strong><PhoneIcon /> {PHONE_DISPLAY}</strong>
             <span>Free Consultation</span>
+            <span>24/7 Emergency Service</span>
           </a>
           <SocialLinks className="header-socials" />
         </div>
