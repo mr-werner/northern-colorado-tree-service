@@ -77,10 +77,53 @@ const services = [
 
 function TreeMark() {
   return (
-    <svg viewBox="0 0 72 72" aria-hidden="true" className="tree-mark">
-      <path d="M6 52 22 31l8 10L43 20l23 32H6Z" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinejoin="round" />
-      <path d="M36 15c-7 8-11 14-11 21 0 7 4 11 9 13v12h4V49c6-2 10-7 10-13 0-7-5-14-12-21Z" fill="currentColor" />
-      <path d="M18 58h36" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+    <svg
+      viewBox="0 0 72 72"
+      aria-hidden="true"
+      className="tree-mark"
+    >
+      {/* Mountain outline */}
+      <path
+        d="M6 52 22 31l8 10L43 20l23 32H6Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.6"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+
+      {/* Evergreen tree */}
+      <path
+        d="
+          M36 14
+          L27 29
+          H31
+          L24 40
+          H29
+          L20 53
+          H34
+          V61
+          H38
+          V53
+          H52
+          L43 40
+          H48
+          L41 29
+          H45
+          Z
+        "
+        fill="currentColor"
+        strokeLinejoin="round"
+      />
+
+      {/* Ground line */}
+      <path
+        d="M18 58H54"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -218,8 +261,8 @@ export default function App() {
         <div className="header-contact">
           <a className="header-callout" href={PHONE_LINK}>
             <span>24/7 Emergency Service</span>
-            
-            
+
+
             <strong><PhoneIcon /> {PHONE_DISPLAY}</strong>
             <span>Free Consultation</span>
           </a>
@@ -246,7 +289,10 @@ export default function App() {
           </div>
           <div className="hero-proof">
             <div><strong>11+</strong><span>Years serving NoCo</span></div>
-            <div><strong>4.9★</strong><span>Customer rating</span></div>
+            <div>
+              <strong>{Number(googleReviews.rating).toFixed(1)}★</strong>
+              <span>Google rating</span>
+            </div>
             <div><strong>ISA</strong><span>Certified arborist</span></div>
             <div><strong>Local</strong><span>Family owned</span></div>
           </div>
