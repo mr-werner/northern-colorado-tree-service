@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const PHONE_DISPLAY = '(970) 775-8877';
 const PHONE_LINK = 'tel:+19707758877';
@@ -172,6 +172,107 @@ function PhoneIcon() {
   );
 }
 
+
+function ServiceAreaMap() {
+  const mapRef = useRef(null);
+
+  useEffect(() => {
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
+    if (!apiKey || !mapRef.current) {
+      if (!apiKey) console.error('VITE_GOOGLE_MAPS_BROWSER_KEY is missing.');
+      return;
+    }
+
+    let servicePolygon = null;
+    let existingScript = null;
+    let addedScript = null;
+    let cancelled = false;
+
+    async function initializeMap() {
+      if (cancelled || !mapRef.current || !window.google?.maps) return;
+
+      try {
+        const { Map } = await window.google.maps.importLibrary('maps');
+        if (cancelled || !mapRef.current) return;
+
+        const map = new Map(mapRef.current, {
+          center: { lat: 40.65, lng: -105.15 },
+          zoom: 8,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: true,
+          zoomControl: true,
+          gestureHandling: 'cooperative',
+        });
+
+        const serviceAreaCoordinates = [
+          { lat: 40.98, lng: -105.72 },
+          { lat: 40.98, lng: -105.30 },
+          { lat: 40.94, lng: -104.78 },
+          { lat: 40.62, lng: -104.62 },
+          { lat: 40.50, lng: -104.72 },
+          { lat: 40.43, lng: -104.88 },
+          { lat: 40.30, lng: -105.08 },
+          { lat: 40.39, lng: -105.47 },
+          { lat: 40.63, lng: -105.55 },
+          { lat: 40.90, lng: -105.72 },
+        ];
+
+        servicePolygon = new window.google.maps.Polygon({
+          paths: serviceAreaCoordinates,
+          strokeColor: '#17352b',
+          strokeOpacity: 1,
+          strokeWeight: 3,
+          fillColor: '#17352b',
+          fillOpacity: 0.28,
+          clickable: false,
+        });
+        servicePolygon.setMap(map);
+
+        const bounds = new window.google.maps.LatLngBounds();
+        serviceAreaCoordinates.forEach((point) => bounds.extend(point));
+        map.fitBounds(bounds, 45);
+      } catch (error) {
+        console.error('Unable to initialize Google Maps:', error);
+      }
+    }
+
+    const handleScriptLoad = () => initializeMap();
+
+    if (window.google?.maps) {
+      initializeMap();
+    } else {
+      existingScript = document.querySelector('script[data-ncts-google-maps]');
+      if (existingScript) {
+        existingScript.addEventListener('load', handleScriptLoad);
+      } else {
+        addedScript = document.createElement('script');
+        addedScript.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&loading=async`;
+        addedScript.async = true;
+        addedScript.defer = true;
+        addedScript.dataset.nctsGoogleMaps = 'true';
+        addedScript.addEventListener('load', handleScriptLoad);
+        document.head.appendChild(addedScript);
+      }
+    }
+
+    return () => {
+      cancelled = true;
+      if (existingScript) existingScript.removeEventListener('load', handleScriptLoad);
+      if (addedScript) addedScript.removeEventListener('load', handleScriptLoad);
+      if (servicePolygon) servicePolygon.setMap(null);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={mapRef}
+      className="service-area-map"
+      aria-label="Northern Colorado Tree Service coverage map"
+    />
+  );
+}
+
 export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [formStatus, setFormStatus] = useState('idle');
@@ -260,8 +361,9 @@ export default function App() {
 
         <div className="header-contact">
           <a className="header-callout" href={PHONE_LINK}>
-            <strong><PhoneIcon /> {PHONE_DISPLAY}</strong>
+            
             <span>Free Consultation</span>
+            <strong><PhoneIcon /> {PHONE_DISPLAY}</strong>
             <span>24/7 Emergency Service</span>
           </a>
           <SocialLinks className="header-socials" />
@@ -396,19 +498,22 @@ export default function App() {
             <h2>Serving Fort Collins and communities across Northern Colorado.</h2>
             <p>Professional tree services for homeowners, businesses, and property managers throughout the region.</p>
           </div>
-          <div className="service-area-visual">
+
+          <div className="service-area-layout">
             <div className="map-frame">
-              <iframe
-                title="Northern Colorado Tree Service service area map"
-                src="https://www.google.com/maps?q=Fort+Collins,+Colorado&z=8&output=embed"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
+              <ServiceAreaMap />
               <div className="map-badge">Serving Northern Colorado</div>
             </div>
-            <div className="city-grid">
-              {serviceAreas.map((city) => <span key={city}>{city}</span>)}
-            </div>
+
+            <aside className="service-area-list">
+              <p className="eyebrow">Service Areas</p>
+              <h3>Local service throughout the region.</h3>
+              <div className="city-grid">
+                {serviceAreas.map((city) => <span key={city}>{city}</span>)}
+              </div>
+              <p className="service-area-note">Don't see your community? Give us a call to confirm service availability in your area.</p>
+              <a className="text-link" href={PHONE_LINK}>Call {PHONE_DISPLAY} <ArrowIcon /></a>
+            </aside>
           </div>
         </section>
 
