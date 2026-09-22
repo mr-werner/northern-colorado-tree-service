@@ -569,3 +569,105 @@ blockquote footer { margin-top: 30px; color: var(--muted); font-size: 12px; text
   .credential-strip { grid-template-columns:1fr; }
   .hero-socials { margin-top:1rem; }
 }
+
+
+/* =========================================================
+   BLUEPRINT WEBSTUDIO — CONCEPT REVIEW
+   ========================================================= */
+.concept-review {
+  position: fixed; right: 22px; bottom: 22px; z-index: 1000;
+  width: min(360px, calc(100vw - 32px)); padding: 18px;
+  background: rgba(16,37,30,.97); color: white;
+  border: 1px solid rgba(255,255,255,.16);
+  box-shadow: 0 18px 55px rgba(0,0,0,.28); backdrop-filter: blur(14px);
+}
+.concept-review-topline {
+  display:flex; align-items:center; gap:8px; margin-bottom:10px;
+  color:rgba(255,255,255,.62); font-size:9px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase;
+}
+.concept-dot { width:7px; height:7px; flex:0 0 7px; border-radius:50%; background:#d1bd95; }
+.concept-review-brand {
+  display:block; margin-bottom:8px; font-family:'Manrope',sans-serif;
+  font-size:18px; font-weight:500;
+}
+.concept-review > p { margin:0; color:rgba(255,255,255,.68); font-size:11px; line-height:1.55; }
+.concept-offer {
+  margin:14px 0; padding:12px 0;
+  border-top:1px solid rgba(255,255,255,.13);
+  border-bottom:1px solid rgba(255,255,255,.13);
+}
+.concept-offer > span {
+  display:block; margin-bottom:9px; color:#d1bd95; font-size:9px;
+  font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+}
+.concept-countdown { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
+.concept-countdown strong {
+  display:flex; flex-direction:column; font-family:'Manrope',sans-serif;
+  font-size:18px; font-weight:500; line-height:1;
+}
+.concept-countdown small {
+  margin-top:5px; color:rgba(255,255,255,.45); font-family:'DM Sans',sans-serif;
+  font-size:7px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+}
+.concept-expired { color:rgba(255,255,255,.72); font-size:12px; }
+.concept-interest-button {
+  width:100%; min-height:44px; display:flex; align-items:center;
+  justify-content:space-between; gap:14px; padding:0 15px; border:0;
+  background:#d1bd95; color:#10251e; cursor:pointer;
+  font-size:11px; font-weight:700; letter-spacing:.04em; transition:.2s ease;
+}
+.concept-interest-button:hover { background:#e2cfaa; }
+.concept-interest-button svg { width:16px; height:16px; }
+
+.concept-modal-backdrop {
+  position:fixed; inset:0; z-index:1100; display:grid; place-items:center;
+  padding:24px; background:rgba(7,17,13,.72); backdrop-filter:blur(6px);
+}
+.concept-modal {
+  position:relative; width:min(620px,100%); max-height:calc(100vh - 48px);
+  overflow-y:auto; padding:42px; background:var(--paper); color:var(--ink);
+  box-shadow:0 30px 90px rgba(0,0,0,.34);
+}
+.concept-modal-close {
+  position:absolute; top:14px; right:16px; width:38px; height:38px;
+  border:0; background:transparent; cursor:pointer; color:var(--muted);
+  font-size:28px; line-height:1;
+}
+.concept-modal h2 { max-width:500px; font-size:clamp(34px,5vw,52px); line-height:1.02; }
+.concept-modal-intro {
+  max-width:500px; margin:18px 0 28px; color:var(--muted);
+  font-size:14px; line-height:1.65;
+}
+.concept-form { display:flex; flex-direction:column; gap:18px; }
+.concept-field-row { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.concept-form label {
+  display:flex; flex-direction:column; gap:7px; color:#56615c;
+  font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+}
+.concept-form label > span { opacity:.55; font-size:8px; }
+.concept-form input, .concept-form textarea, .concept-form select {
+  width:100%; padding:11px 0; border:0; border-bottom:1px solid #c8cbc6;
+  border-radius:0; outline:0; background:transparent; color:var(--ink);
+  font-size:14px; font-weight:400; letter-spacing:0; text-transform:none;
+}
+.concept-form input:focus, .concept-form textarea:focus, .concept-form select:focus {
+  border-color:var(--forest);
+}
+.concept-form textarea { resize:vertical; }
+.concept-submit { margin-top:4px; background:var(--forest); color:white; }
+.concept-submit:hover { background:var(--forest-2); }
+.concept-submit:disabled { cursor:wait; opacity:.7; }
+.concept-error { margin:0; color:#9d2d20; font-size:12px; }
+.concept-success { padding-top:8px; }
+.concept-success > strong { display:block; font-family:'Manrope',sans-serif; font-size:20px; }
+.concept-success > p { margin:8px 0 24px; color:var(--muted); font-size:13px; }
+
+@media (max-width:640px) {
+  .concept-review { right:12px; bottom:12px; width:min(330px,calc(100vw - 24px)); padding:14px; }
+  .concept-review > p { display:none; }
+  .concept-offer { margin:10px 0; padding:10px 0; }
+  .concept-modal-backdrop { padding:12px; }
+  .concept-modal { max-height:calc(100vh - 24px); padding:34px 22px 24px; }
+  .concept-field-row { grid-template-columns:1fr; }
+}

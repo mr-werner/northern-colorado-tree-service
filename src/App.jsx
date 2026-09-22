@@ -6,6 +6,8 @@ import nocoWinner2025 from './assets/credentials/2025-noco-winner.png';
 
 const PHONE_DISPLAY = '(970) 775-8877';
 const PHONE_LINK = 'tel:+19707758877';
+
+const CONCEPT_OFFER_END = new Date('2026-09-29T23:59:59-06:00').getTime();
 const HERO_IMAGE = 'https://img1.wsimg.com/isteam/ip/2fd858d6-a7b3-49c6-b691-e5875ae14b5f/blob-0001.png';
 
 const credentials = [
@@ -385,6 +387,151 @@ function ServiceAreaMap() {
   );
 }
 
+
+function ConceptReview() {
+  const [open, setOpen] = useState(false);
+  const [status, setStatus] = useState('idle');
+  const [timeLeft, setTimeLeft] = useState(() => Math.max(0, CONCEPT_OFFER_END - Date.now()));
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setTimeLeft(Math.max(0, CONCEPT_OFFER_END - Date.now()));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const totalSeconds = Math.floor(timeLeft / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  async function handleInterestSubmit(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = Object.fromEntries(new FormData(form).entries());
+
+    if (data.website) return;
+    setStatus('sending');
+
+    try {
+      const response = await fetch('/api/demo-interest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...data,
+          prospect: 'Northern Colorado Tree Service',
+          source: window.location.href,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Request failed');
+      setStatus('success');
+      form.reset();
+    } catch (error) {
+      console.error('Unable to send concept-review interest:', error);
+      setStatus('error');
+    }
+  }
+
+  return (
+    <>
+      <aside className="concept-review" aria-label="Concept review notice">
+        <div className="concept-review-topline">
+          <span className="concept-dot" />
+          Concept Review · Not For Official Use
+        </div>
+
+        <strong className="concept-review-brand">Blueprint WebStudio</strong>
+        <p>This custom redesign was created as a private concept for Northern Colorado Tree Service.</p>
+
+        <div className="concept-offer">
+          <span>Limited-Time Partner Offer</span>
+          {timeLeft > 0 ? (
+            <div className="concept-countdown" aria-label="Offer countdown">
+              <strong>{days}<small>days</small></strong>
+              <strong>{String(hours).padStart(2, '0')}<small>hrs</small></strong>
+              <strong>{String(minutes).padStart(2, '0')}<small>min</small></strong>
+              <strong>{String(seconds).padStart(2, '0')}<small>sec</small></strong>
+            </div>
+          ) : (
+            <strong className="concept-expired">Offer window ended</strong>
+          )}
+        </div>
+
+        <button type="button" className="concept-interest-button" onClick={() => setOpen(true)}>
+          I'm Interested <ArrowIcon />
+        </button>
+      </aside>
+
+      {open && (
+        <div
+          className="concept-modal-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setOpen(false);
+          }}
+        >
+          <div className="concept-modal" role="dialog" aria-modal="true" aria-labelledby="concept-modal-title">
+            <button type="button" className="concept-modal-close" onClick={() => setOpen(false)} aria-label="Close interest form">×</button>
+
+            <p className="eyebrow">Blueprint WebStudio</p>
+            <h2 id="concept-modal-title">Interested in this redesign?</h2>
+            <p className="concept-modal-intro">
+              Send a quick note and Blueprint WebStudio will follow up about launching,
+              customizing, or taking over the site.
+            </p>
+
+            {status === 'success' ? (
+              <div className="concept-success">
+                <strong>Thanks — your interest was sent.</strong>
+                <p>We'll be in touch soon.</p>
+                <button type="button" className="concept-interest-button" onClick={() => setOpen(false)}>Close</button>
+              </div>
+            ) : (
+              <form className="concept-form" onSubmit={handleInterestSubmit}>
+                <div className="concept-field-row">
+                  <label>Name<input name="name" type="text" required placeholder="Your name" /></label>
+                  <label>Email<input name="email" type="email" required placeholder="you@email.com" /></label>
+                </div>
+
+                <div className="concept-field-row">
+                  <label>Phone<input name="phone" type="tel" placeholder="(970) 555-0100" /></label>
+                  <label>
+                    Budget
+                    <select name="budget" defaultValue="">
+                      <option value="" disabled>Select range</option>
+                      <option>Under $2,500</option>
+                      <option>$2,500–$5,000</option>
+                      <option>$5,000–$10,000</option>
+                      <option>$10,000+</option>
+                      <option>Not sure yet</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label>
+                  Message <span>optional</span>
+                  <textarea name="message" rows="4" placeholder="Anything you'd like us to know?" />
+                </label>
+
+                <input className="honeypot" name="website" tabIndex="-1" autoComplete="off" aria-hidden="true" />
+
+                <button type="submit" className="concept-interest-button concept-submit" disabled={status === 'sending'}>
+                  {status === 'sending' ? 'Sending…' : 'Send My Interest'}
+                  {status !== 'sending' && <ArrowIcon />}
+                </button>
+
+                {status === 'error' && <p className="concept-error">We couldn't send the request. Please try again.</p>}
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [formStatus, setFormStatus] = useState('idle');
@@ -752,6 +899,7 @@ export default function App() {
         </div>
       </footer>
 
+      <ConceptReview />
     </div>
   );
 }
