@@ -1,8 +1,43 @@
 import { useEffect, useRef, useState } from 'react';
+import isaCertifiedArborist from './assets/credentials/isa-certified-arborist.png';
+import isaMember from './assets/credentials/isa-member.png';
+import isaClimberSpecialist from './assets/credentials/isa-climber-specialist.png';
+import nocoWinner2025 from './assets/credentials/2025-noco-winner.png';
 
 const PHONE_DISPLAY = '(970) 775-8877';
 const PHONE_LINK = 'tel:+19707758877';
 const HERO_IMAGE = 'https://img1.wsimg.com/isteam/ip/2fd858d6-a7b3-49c6-b691-e5875ae14b5f/blob-0001.png';
+
+const credentials = [
+  {
+    image: isaCertifiedArborist,
+    alt: 'ISA Certified Arborist',
+    title: 'Certified Arborist',
+    subtitle: 'International Society of Arboriculture',
+    className: 'credential-isa',
+  },
+  {
+    image: isaMember,
+    alt: 'International Society of Arboriculture Professional Member',
+    title: 'Professional Member',
+    subtitle: 'International Society of Arboriculture',
+    className: 'credential-member',
+  },
+  {
+    image: isaClimberSpecialist,
+    alt: 'ISA Certified Tree Worker Climber Specialist',
+    title: 'Climber Specialist',
+    subtitle: 'ISA Certified Tree Worker',
+    className: 'credential-isa',
+  },
+  {
+    image: nocoWinner2025,
+    alt: '2025 Readers Choice Best of NOCO Winner',
+    title: 'Best of NOCO',
+    subtitle: 'Readers’ Choice Winner · 2021–2025',
+    className: 'credential-noco',
+  },
+];
 
 const SOCIAL_LINKS = {
   yelp: 'https://www.yelp.com/biz/northern-colorado-tree-service-fort-collins',
@@ -637,6 +672,56 @@ export default function App() {
         </section>
       </main>
 
+      <section
+        className="credentials-section"
+        aria-labelledby="credentials-heading"
+      >
+        <div className="container">
+          <div className="credentials-heading">
+            <p className="eyebrow">
+              Credentials & Recognition
+            </p>
+
+            <h2 id="credentials-heading">
+              Professional expertise.
+              <br />
+              Recognized locally.
+            </h2>
+
+            <p>
+              Certified arborist expertise backed by professional
+              industry credentials and years of recognition from
+              the Northern Colorado community.
+            </p>
+          </div>
+
+          <div className="credentials-grid">
+            {credentials.map((credential) => (
+              <article
+                className="credential-item"
+                key={credential.title}
+              >
+                <div className="credential-image-wrap">
+                  <img
+                    src={credential.image}
+                    alt={credential.alt}
+                    className={`credential-image ${credential.className}`}
+                    loading="lazy"
+                  />
+                </div>
+
+                <div className="credential-copy">
+                  <h3>{credential.title}</h3>
+                  <p>{credential.subtitle}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <footer className="site-footer"></footer>
+
       <footer className="site-footer">
         <div className="container footer-grid">
           <div className="footer-brand">
@@ -660,12 +745,7 @@ export default function App() {
             <a className="footer-emergency" href={PHONE_LINK}>24/7 Emergency Service</a>
           </div>
         </div>
-        <div className="container credential-strip">
-          <div><strong>#1 Tree Service</strong><span>Northern Colorado · 2021–2025</span></div>
-          <div><strong>ISA Certified</strong><span>Certified arborist expertise</span></div>
-          <div><strong>Licensed & Insured</strong><span>Liability + workers’ compensation</span></div>
-          <div><strong>Family Owned</strong><span>10+ years serving Northern Colorado</span></div>
-        </div>
+
         <div className="container footer-bottom">
           <span>© {new Date().getFullYear()} Northern Colorado Tree Service</span>
           <span>Concept redesign by Blueprint WebStudio</span>
