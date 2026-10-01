@@ -415,7 +415,7 @@ function ConceptReview() {
     setStatus('sending');
 
     try {
-      const response = await fetch('/api/demo-interest', {
+      const response = await fetch('https://ncts.blueprintwebstudio.com/api/demo-interest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
