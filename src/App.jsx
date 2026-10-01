@@ -7,7 +7,7 @@ import nocoWinner2025 from './assets/credentials/2025-noco-winner.png';
 const PHONE_DISPLAY = '(970) 775-8877';
 const PHONE_LINK = 'tel:+19707758877';
 
-const CONCEPT_OFFER_END = new Date('2026-09-29T23:59:59-06:00').getTime();
+const CONCEPT_OFFER_END = new Date('2026-10-29T23:59:59-06:00').getTime();
 const HERO_IMAGE = 'https://img1.wsimg.com/isteam/ip/2fd858d6-a7b3-49c6-b691-e5875ae14b5f/blob-0001.png';
 
 const credentials = [
@@ -415,7 +415,7 @@ function ConceptReview() {
     setStatus('sending');
 
     try {
-      const response = await fetch('https://ncts.blueprintwebstudio.com/api/demo-interest', {
+      const response = await fetch('https://blueprintwebstudio.com/api/demo-interest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
