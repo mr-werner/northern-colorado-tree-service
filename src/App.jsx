@@ -436,94 +436,291 @@ function ConceptReview() {
 
   return (
     <>
-      <aside className="concept-review" aria-label="Concept review notice">
-        <div className="concept-review-topline">
-          <span className="concept-dot" />
-          Concept Review · Not For Official Use
-        </div>
+      <aside
+        className={`concept-review-badge ${expanded ? "is-expanded" : "is-collapsed"
+          }`}
+        aria-label="Private client preview"
+      >
+        <button
+          className="concept-review-toggle"
+          onClick={() => setExpanded((current) => !current)}
+          aria-expanded={expanded}
+        >
+          <span>Concept Review · Not For Official Use</span>
 
-        <strong className="concept-review-brand">Blueprint WebStudio</strong>
-        <p>This custom redesign was created as a private concept for Northern Colorado Tree Service.</p>
-
-        <div className="concept-offer">
-          <span>Limited-Time Partner Offer</span>
-          {timeLeft > 0 ? (
-            <div className="concept-countdown" aria-label="Offer countdown">
-              <strong>{days}<small>days</small></strong>
-              <strong>{String(hours).padStart(2, '0')}<small>hrs</small></strong>
-              <strong>{String(minutes).padStart(2, '0')}<small>min</small></strong>
-              <strong>{String(seconds).padStart(2, '0')}<small>sec</small></strong>
-            </div>
-          ) : (
-            <strong className="concept-expired">Offer window ended</strong>
-          )}
-        </div>
-
-        <button type="button" className="concept-interest-button" onClick={() => setOpen(true)}>
-          I'm Interested <ArrowIcon />
+          <span className="concept-review-chevron">
+            {expanded ? "−" : "+"}
+          </span>
         </button>
+
+        {expanded && (
+          <div className="concept-review-content">
+            <div className="concept-review-private">
+              Private Client Preview
+            </div>
+
+            {!timeLeft.expired ? (
+              <>
+                <div className="concept-review-program">
+                  Partner Program Eligibility
+                </div>
+
+                <div className="concept-review-reserved">
+                  Reserved for
+                </div>
+
+                <div className="concept-review-time">
+                  <span>
+                    <strong>{timeLeft.days}</strong> Days
+                  </span>
+
+                  <span className="concept-review-dot">·</span>
+
+                  <span>
+                    <strong>{timeLeft.hours}</strong> Hours
+                  </span>
+
+                  <span className="concept-review-dot">·</span>
+
+                  <span>
+                    <strong>{timeLeft.minutes}</strong> Minutes
+                  </span>
+                </div>
+
+                <button
+                  className="concept-review-accept"
+                  onClick={() => {
+                    setSubmitted(false);
+                    setShowForm(true);
+                  }}
+                >
+                  I'm Interested
+                </button>
+              </>
+            ) : (
+              <div className="concept-review-expired">
+                Partner Program offer expired
+              </div>
+            )}
+
+            <div className="concept-review-contact">
+              <a href="tel:+17205156647">
+                Call
+              </a>
+
+              <span>·</span>
+
+              <a href="mailto:hello@blueprintwebstudio.com">
+                Email
+              </a>
+
+              <span>·</span>
+
+              <a
+                href="https://blueprintwebstudio.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Website
+              </a>
+            </div>
+          </div>
+        )}
+
+        <div className="concept-review-credit">
+          <span
+            className="concept-review-logo"
+            aria-hidden="true"
+          />
+          <span>© Blueprint WebStudio</span>
+        </div>
       </aside>
 
-      {open && (
+      {showForm && (
         <div
-          className="concept-modal-backdrop"
-          role="presentation"
+          className="interest-modal-overlay"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setOpen(false);
+            if (event.target === event.currentTarget) {
+              closeModal();
+            }
           }}
         >
-          <div className="concept-modal" role="dialog" aria-modal="true" aria-labelledby="concept-modal-title">
-            <button type="button" className="concept-modal-close" onClick={() => setOpen(false)} aria-label="Close interest form">×</button>
+          <div
+            className="interest-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="interest-modal-title"
+          >
+            <button
+              type="button"
+              className="interest-modal-close"
+              onClick={closeModal}
+              aria-label="Close"
+            >
+              ×
+            </button>
 
-            <p className="eyebrow">Blueprint WebStudio</p>
-            <h2 id="concept-modal-title">Interested in this redesign?</h2>
-            <p className="concept-modal-intro">
-              Send a quick note and Blueprint WebStudio will follow up about launching,
-              customizing, or taking over the site.
-            </p>
-
-            {status === 'success' ? (
-              <div className="concept-success">
-                <strong>Thanks — your interest was sent.</strong>
-                <p>We'll be in touch soon.</p>
-                <button type="button" className="concept-interest-button" onClick={() => setOpen(false)}>Close</button>
-              </div>
-            ) : (
-              <form className="concept-form" onSubmit={handleInterestSubmit}>
-                <div className="concept-field-row">
-                  <label>Name<input name="name" type="text" required placeholder="Your name" /></label>
-                  <label>Email<input name="email" type="email" required placeholder="you@email.com" /></label>
+            {!submitted ? (
+              <>
+                <div className="interest-modal-eyebrow">
+                  Blueprint WebStudio Partner Program
                 </div>
 
-                <div className="concept-field-row">
-                  <label>Phone<input name="phone" type="tel" placeholder="(970) 555-0100" /></label>
-                  <label>
-                    Budget
-                    <select name="budget" defaultValue="">
-                      <option value="" disabled>Select range</option>
-                      <option>Under $2,500</option>
-                      <option>$2,500–$5,000</option>
-                      <option>$5,000–$10,000</option>
-                      <option>$10,000+</option>
-                      <option>Not sure yet</option>
+                <h2
+                  id="interest-modal-title"
+                  className="interest-modal-title"
+                >
+                  Let's talk about your concept
+                </h2>
+
+                <p className="interest-modal-description">
+                  Interested in moving forward or learning more about
+                  Partner Program pricing? Send us your information and
+                  we'll reach out to discuss the concept and next steps.
+                </p>
+
+                <form
+                  className="interest-modal-form"
+                  onSubmit={handleSubmit}
+                >
+                  <label className="interest-field">
+                    <span>
+                      Name <strong>*</strong>
+                    </span>
+
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      autoComplete="name"
+                    />
+                  </label>
+
+                  <label className="interest-field">
+                    <span>
+                      Email <strong>*</strong>
+                    </span>
+
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      autoComplete="email"
+                    />
+                  </label>
+
+                  <label className="interest-field">
+                    <span>Phone</span>
+
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      autoComplete="tel"
+                    />
+                  </label>
+
+                  <label className="interest-field">
+                    <span>
+                      Budget <strong>*</strong>
+                    </span>
+
+                    <select
+                      name="budget"
+                      value={formData.budget}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">
+                        Select a range...
+                      </option>
+
+                      <option value="Under $2,500">
+                        Under $2,500
+                      </option>
+
+                      <option value="$2,500 – $5,000">
+                        $2,500 – $5,000
+                      </option>
+
+                      <option value="$5,000 – $10,000">
+                        $5,000 – $10,000
+                      </option>
+
+                      <option value="$10,000 – $20,000">
+                        $10,000 – $20,000
+                      </option>
+
+                      <option value="$20,000+">
+                        $20,000+
+                      </option>
+
+                      <option value="Not sure yet">
+                        Not sure yet
+                      </option>
                     </select>
                   </label>
+
+                  <label className="interest-field">
+                    <span>Message <em>(optional)</em></span>
+
+                    <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      rows="4"
+                      placeholder="Questions, ideas, or anything you'd like us to know..."
+                    />
+                  </label>
+
+                  {error && (
+                    <div className="interest-modal-error">
+                      {error}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="interest-modal-submit"
+                    disabled={submitting}
+                  >
+                    {submitting
+                      ? "Sending..."
+                      : "Send My Interest"}
+                  </button>
+
+                  <p className="interest-modal-disclaimer">
+                    No commitment — we'll contact you to discuss the
+                    concept and next steps.
+                  </p>
+                </form>
+              </>
+            ) : (
+              <div className="interest-modal-success">
+                <div className="interest-modal-success-mark">
+                  ✓
                 </div>
 
-                <label>
-                  Message <span>optional</span>
-                  <textarea name="message" rows="4" placeholder="Anything you'd like us to know?" />
-                </label>
+                <h2>Thank you.</h2>
 
-                <input className="honeypot" name="website" tabIndex="-1" autoComplete="off" aria-hidden="true" />
+                <p>
+                  Blueprint WebStudio has received your interest and
+                  will follow up with you about this concept.
+                </p>
 
-                <button type="submit" className="concept-interest-button concept-submit" disabled={status === 'sending'}>
-                  {status === 'sending' ? 'Sending…' : 'Send My Interest'}
-                  {status !== 'sending' && <ArrowIcon />}
+                <button
+                  type="button"
+                  className="interest-modal-submit"
+                  onClick={closeModal}
+                >
+                  Return to Preview
                 </button>
-
-                {status === 'error' && <p className="concept-error">We couldn't send the request. Please try again.</p>}
-              </form>
+              </div>
             )}
           </div>
         </div>
