@@ -490,11 +490,10 @@ function ConceptReview() {
           ========================================= */}
 
       <aside
-        className={`concept-review-badge ${
-          expanded
+        className={`concept-review-badge ${expanded
             ? 'is-expanded'
             : 'is-collapsed'
-        }`}
+          }`}
         aria-label="Private client preview"
       >
 
@@ -611,10 +610,11 @@ function ConceptReview() {
         <div className="concept-review-credit">
 
           <span
-            src={blueprintLogo}
             className="concept-review-logo"
             aria-hidden="true"
-            alt=""
+            style={{
+              '--blueprint-logo': `url(${blueprintLogo})`,
+            }}
           />
 
           <span>
@@ -644,11 +644,10 @@ function ConceptReview() {
         >
 
           <div
-            className={`interest-modal ${
-              status === 'success'
+            className={`interest-modal ${status === 'success'
                 ? 'is-success'
                 : ''
-            }`}
+              }`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="interest-modal-title"

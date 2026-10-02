@@ -828,14 +828,25 @@ blockquote footer { margin-top: 30px; color: var(--muted); font-size: 12px; text
 }
 
 .concept-review-logo {
+  display: block;
+  flex: 0 0 auto;
+
   width: 18px;
   height: 18px;
 
-  display: block;
+  background-color: rgba(255, 255, 255, 0.7);
 
-  object-fit: contain;
+  -webkit-mask-image: var(--blueprint-logo);
+  mask-image: var(--blueprint-logo);
 
-  opacity: 0.65;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  -webkit-mask-position: center;
+  mask-position: center;
+
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 
