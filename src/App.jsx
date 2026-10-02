@@ -3,6 +3,7 @@ import isaCertifiedArborist from './assets/credentials/isa-certified-arborist.pn
 import isaMember from './assets/credentials/isa-member.png';
 import isaClimberSpecialist from './assets/credentials/isa-climber-specialist.png';
 import nocoWinner2025 from './assets/credentials/2025-noco-winner.png';
+import blueprintLogo from './assets/blueprint-webstudio-logo.png';
 
 const PHONE_DISPLAY = '(970) 775-8877';
 const PHONE_LINK = 'tel:+19707758877';
@@ -610,8 +611,10 @@ function ConceptReview() {
         <div className="concept-review-credit">
 
           <span
+            src={blueprintLogo}
             className="concept-review-logo"
             aria-hidden="true"
+            alt=""
           />
 
           <span>
