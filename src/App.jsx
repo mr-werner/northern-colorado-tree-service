@@ -389,77 +389,144 @@ function ServiceAreaMap() {
 
 
 function ConceptReview() {
-  const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState(true);
+  const [showForm, setShowForm] = useState(false);
   const [status, setStatus] = useState('idle');
-  const [timeLeft, setTimeLeft] = useState(() => Math.max(0, CONCEPT_OFFER_END - Date.now()));
+
+  const [timeLeft, setTimeLeft] = useState(() =>
+    Math.max(0, CONCEPT_OFFER_END - Date.now())
+  );
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setTimeLeft(Math.max(0, CONCEPT_OFFER_END - Date.now()));
+      setTimeLeft(
+        Math.max(0, CONCEPT_OFFER_END - Date.now())
+      );
     }, 1000);
+
     return () => window.clearInterval(timer);
   }, []);
 
   const totalSeconds = Math.floor(timeLeft / 1000);
+
   const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+
+  const hours = Math.floor(
+    (totalSeconds % 86400) / 3600
+  );
+
+  const minutes = Math.floor(
+    (totalSeconds % 3600) / 60
+  );
+
+  const expired = timeLeft <= 0;
+
+  function openModal() {
+    setStatus('idle');
+    setShowForm(true);
+  }
+
+  function closeModal() {
+    setShowForm(false);
+    setStatus('idle');
+  }
 
   async function handleInterestSubmit(event) {
     event.preventDefault();
-    const form = event.currentTarget;
-    const data = Object.fromEntries(new FormData(form).entries());
 
+    const form = event.currentTarget;
+
+    const data = Object.fromEntries(
+      new FormData(form).entries()
+    );
+
+    // Honeypot spam protection
     if (data.website) return;
+
     setStatus('sending');
 
     try {
-      const response = await fetch("https://www.blueprintwebstudio.com/api/demo-interest", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...data,
-          prospect: 'Northern Colorado Tree Service',
-          source: window.location.href,
-        }),
-      });
+      const response = await fetch(
+        'https://www.blueprintwebstudio.com/api/demo-interest',
+        {
+          method: 'POST',
 
-      if (!response.ok) throw new Error('Request failed');
+          headers: {
+            'Content-Type': 'application/json',
+          },
+
+          body: JSON.stringify({
+            ...data,
+            prospect: 'Northern Colorado Tree Service',
+            source: window.location.href,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Request failed: ${response.status}`
+        );
+      }
+
       setStatus('success');
       form.reset();
+
     } catch (error) {
-      console.error('Unable to send concept-review interest:', error);
+      console.error(
+        'Unable to send concept-review interest:',
+        error
+      );
+
       setStatus('error');
     }
   }
 
   return (
     <>
+      {/* =========================================
+          CONCEPT REVIEW BADGE
+          ========================================= */}
+
       <aside
-        className={`concept-review-badge ${expanded ? "is-expanded" : "is-collapsed"
-          }`}
+        className={`concept-review-badge ${
+          expanded
+            ? 'is-expanded'
+            : 'is-collapsed'
+        }`}
         aria-label="Private client preview"
       >
+
+        {/* EXPAND / COLLAPSE */}
+
         <button
+          type="button"
           className="concept-review-toggle"
-          onClick={() => setExpanded((current) => !current)}
+          onClick={() =>
+            setExpanded((current) => !current)
+          }
           aria-expanded={expanded}
         >
-          <span>Concept Review · Not For Official Use</span>
+          <span>
+            Concept Review · Not For Official Use
+          </span>
 
           <span className="concept-review-chevron">
-            {expanded ? "−" : "+"}
+            {expanded ? '−' : '+'}
           </span>
         </button>
 
+
+        {/* EXPANDED CONTENT */}
+
         {expanded && (
           <div className="concept-review-content">
+
             <div className="concept-review-private">
               Private Client Preview
             </div>
 
-            {!timeLeft.expired ? (
+            {!expired ? (
               <>
                 <div className="concept-review-program">
                   Partner Program Eligibility
@@ -470,29 +537,33 @@ function ConceptReview() {
                 </div>
 
                 <div className="concept-review-time">
-                  <span>
-                    <strong>{timeLeft.days}</strong> Days
-                  </span>
-
-                  <span className="concept-review-dot">·</span>
 
                   <span>
-                    <strong>{timeLeft.hours}</strong> Hours
+                    <strong>{days}</strong> Days
                   </span>
 
-                  <span className="concept-review-dot">·</span>
+                  <span className="concept-review-dot">
+                    ·
+                  </span>
 
                   <span>
-                    <strong>{timeLeft.minutes}</strong> Minutes
+                    <strong>{hours}</strong> Hours
                   </span>
+
+                  <span className="concept-review-dot">
+                    ·
+                  </span>
+
+                  <span>
+                    <strong>{minutes}</strong> Minutes
+                  </span>
+
                 </div>
 
                 <button
+                  type="button"
                   className="concept-review-accept"
-                  onClick={() => {
-                    setSubmitted(false);
-                    setShowForm(true);
-                  }}
+                  onClick={openModal}
                 >
                   I'm Interested
                 </button>
@@ -503,7 +574,11 @@ function ConceptReview() {
               </div>
             )}
 
+
+            {/* CONTACT LINKS */}
+
             <div className="concept-review-contact">
+
               <a href="tel:+17205156647">
                 Call
               </a>
@@ -523,34 +598,62 @@ function ConceptReview() {
               >
                 Website
               </a>
+
             </div>
+
           </div>
         )}
 
+
+        {/* BLUEPRINT CREDIT */}
+
         <div className="concept-review-credit">
+
           <span
             className="concept-review-logo"
             aria-hidden="true"
           />
-          <span>© Blueprint WebStudio</span>
+
+          <span>
+            © Blueprint WebStudio
+          </span>
+
         </div>
+
       </aside>
 
+
+      {/* =========================================
+          INTEREST MODAL
+          ========================================= */}
+
       {showForm && (
+
         <div
           className="interest-modal-overlay"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
+            if (
+              event.target === event.currentTarget
+            ) {
               closeModal();
             }
           }}
         >
+
           <div
-            className="interest-modal"
+            className={`interest-modal ${
+              status === 'success'
+                ? 'is-success'
+                : ''
+            }`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="interest-modal-title"
           >
+
+
+            {/* X CLOSE BUTTON */}
+
             <button
               type="button"
               className="interest-modal-close"
@@ -560,8 +663,45 @@ function ConceptReview() {
               ×
             </button>
 
-            {!submitted ? (
+
+            {/* =====================================
+                SUCCESS
+                ===================================== */}
+
+            {status === 'success' ? (
+
+              <div className="interest-modal-success">
+
+                <div className="interest-modal-eyebrow">
+                  Blueprint WebStudio
+                </div>
+
+                <h2 id="interest-modal-title">
+                  Thanks — your interest was sent.
+                </h2>
+
+                <p>
+                  We'll be in touch soon.
+                </p>
+
+                <button
+                  type="button"
+                  className="interest-modal-submit"
+                  onClick={closeModal}
+                >
+                  Close
+                </button>
+
+              </div>
+
+            ) : (
+
+              /* ===================================
+                 FORM
+                 =================================== */
+
               <>
+
                 <div className="interest-modal-eyebrow">
                   Blueprint WebStudio Partner Program
                 </div>
@@ -570,20 +710,27 @@ function ConceptReview() {
                   id="interest-modal-title"
                   className="interest-modal-title"
                 >
-                  Let's talk about your concept
+                  Interested in this redesign?
                 </h2>
 
                 <p className="interest-modal-description">
-                  Interested in moving forward or learning more about
-                  Partner Program pricing? Send us your information and
-                  we'll reach out to discuss the concept and next steps.
+                  Send a quick note and Blueprint
+                  WebStudio will follow up about
+                  launching, customizing, or taking
+                  over the site.
                 </p>
+
 
                 <form
                   className="interest-modal-form"
-                  onSubmit={handleSubmit}
+                  onSubmit={handleInterestSubmit}
                 >
+
+
+                  {/* NAME */}
+
                   <label className="interest-field">
+
                     <span>
                       Name <strong>*</strong>
                     </span>
@@ -591,14 +738,17 @@ function ConceptReview() {
                     <input
                       type="text"
                       name="name"
-                      value={formData.name}
-                      onChange={handleChange}
                       required
                       autoComplete="name"
                     />
+
                   </label>
 
+
+                  {/* EMAIL */}
+
                   <label className="interest-field">
+
                     <span>
                       Email <strong>*</strong>
                     </span>
@@ -606,37 +756,48 @@ function ConceptReview() {
                     <input
                       type="email"
                       name="email"
-                      value={formData.email}
-                      onChange={handleChange}
                       required
                       autoComplete="email"
                     />
+
                   </label>
 
+
+                  {/* PHONE */}
+
                   <label className="interest-field">
-                    <span>Phone</span>
+
+                    <span>
+                      Phone
+                    </span>
 
                     <input
                       type="tel"
                       name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
                       autoComplete="tel"
                     />
+
                   </label>
 
+
+                  {/* BUDGET */}
+
                   <label className="interest-field">
+
                     <span>
                       Budget <strong>*</strong>
                     </span>
 
                     <select
                       name="budget"
-                      value={formData.budget}
-                      onChange={handleChange}
+                      defaultValue=""
                       required
                     >
-                      <option value="">
+
+                      <option
+                        value=""
+                        disabled
+                      >
                         Select a range...
                       </option>
 
@@ -663,68 +824,86 @@ function ConceptReview() {
                       <option value="Not sure yet">
                         Not sure yet
                       </option>
+
                     </select>
+
                   </label>
 
+
+                  {/* MESSAGE */}
+
                   <label className="interest-field">
-                    <span>Message <em>(optional)</em></span>
+
+                    <span>
+                      Message <em>(optional)</em>
+                    </span>
 
                     <textarea
                       name="message"
-                      value={formData.message}
-                      onChange={handleChange}
                       rows="4"
                       placeholder="Questions, ideas, or anything you'd like us to know..."
                     />
+
                   </label>
 
-                  {error && (
+
+                  {/* HONEYPOT */}
+
+                  <input
+                    className="honeypot"
+                    type="text"
+                    name="website"
+                    tabIndex="-1"
+                    autoComplete="off"
+                    aria-hidden="true"
+                  />
+
+
+                  {/* ERROR */}
+
+                  {status === 'error' && (
+
                     <div className="interest-modal-error">
-                      {error}
+                      We couldn't send the request.
+                      Please try again.
                     </div>
+
                   )}
+
+
+                  {/* SUBMIT */}
 
                   <button
                     type="submit"
                     className="interest-modal-submit"
-                    disabled={submitting}
+                    disabled={
+                      status === 'sending'
+                    }
                   >
-                    {submitting
-                      ? "Sending..."
-                      : "Send My Interest"}
+                    {status === 'sending'
+                      ? 'Sending...'
+                      : 'Send My Interest'}
                   </button>
 
+
                   <p className="interest-modal-disclaimer">
-                    No commitment — we'll contact you to discuss the
-                    concept and next steps.
+                    No commitment — we'll contact you
+                    to discuss the concept and next
+                    steps.
                   </p>
+
                 </form>
+
               </>
-            ) : (
-              <div className="interest-modal-success">
-                <div className="interest-modal-success-mark">
-                  ✓
-                </div>
 
-                <h2>Thank you.</h2>
-
-                <p>
-                  Blueprint WebStudio has received your interest and
-                  will follow up with you about this concept.
-                </p>
-
-                <button
-                  type="button"
-                  className="interest-modal-submit"
-                  onClick={closeModal}
-                >
-                  Return to Preview
-                </button>
-              </div>
             )}
+
           </div>
+
         </div>
+
       )}
+
     </>
   );
 }
